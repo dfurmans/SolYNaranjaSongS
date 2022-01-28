@@ -1,0 +1,46 @@
+# Virtual Host configuration for solynaranjas.com
+#
+# You can move that to a different file under sites-available/ and symlink that
+# to sites-enabled/ to enable it.
+#
+#
+#
+server {
+    listen        80; 
+    server_name   solynaranjas.com www.solynaranjas.com;
+    return 301    https://www.solynaranjas.com$1;
+}
+
+server {
+	listen 443 ssl;
+
+	server_name www.solynaranjas.com;
+
+	root /var/www/html/solynaranjas;
+	index index.html;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+       
+        #Specifies that Nginx is looking for .php files
+	location ~ \.php$ { 
+		#If a file isn’t found, 404
+		try_files $uri =404; 
+		#Include Nginx’s fastcgi configuration
+		include /etc/nginx/fastcgi.conf;
+		#Look for the FastCGI Process Manager at this location 
+		fastcgi_pass unix:/run/php/php7.3-fpm.sock; 
+	} 
+        access_log  /var/log/nginx/sys_access.log;
+        error_log   /var/log/nginx/sys_error.log  error;        
+    # config to enable HSTS(HTTP Strict Transport Security)
+    add_header Strict-Transport-Security "max-age=15552000; includeSubdomains;";
+    #listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/solynaranjas.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/solynaranjas.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
